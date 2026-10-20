@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Report a found ID · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<div class="narrow section"><div class="card">
+  {% include "partials/_tabs.html" with active="found" %}
+  <h2>Report a found ID</h2>
+  <p>Do not photograph the ID or copy the full number. Only type the name and the last 5 characters. A team member reviews every report before it is listed.</p>
+  <form method="post" novalidate>{% csrf_token %}
+    {% if form.non_field_errors %}<div class="form-errors" role="alert">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+    <div class="hp" aria-hidden="true">{{ form.website }}</div>
+    {% include "partials/_field.html" with field=form.full_name %}
+    {% include "partials/_field.html" with field=form.last5 %}
+    {% include "partials/_field.html" with field=form.area %}
+    {% include "partials/_field.html" with field=form.location_detail %}
+    {% include "partials/_field.html" with field=form.holder_name %}
+    {% include "partials/_field.html" with field=form.holder_phone %}
+    {% include "partials/_field.html" with field=form.seen_confirmed %}
+    <button class="btn btn-block" type="submit">{% include "partials/_icon.html" with name="send" %} Submit found ID</button>
+  </form>
+  {% include "partials/_rule.html" %}
+</div></div>
+{% endblock %}

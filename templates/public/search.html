@@ -1,0 +1,36 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}{% if q %}Results for {{ q }} · {% endif %}Search · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<div class="narrow section">
+  <div class="card">
+    {% include "partials/_tabs.html" with active="search" %}
+    <form method="get" action="{% url 'public:search' %}" role="search">
+      <div class="searchbar">
+        <label for="q" class="skip">Name or last 5 characters</label>
+        <input id="q" name="q" value="{{ q }}" placeholder="Name or last 5 e.g. 50E63" autocomplete="off" required>
+        <button class="btn btn-dark" type="submit">{% include "partials/_icon.html" with name="search" %} Search now</button>
+      </div>
+    </form>
+    {% if error %}<div class="form-errors" role="alert">{{ error }}</div>{% endif %}
+    {% if results is not None %}
+      {% if results %}
+        <p class="help"><b>{{ results|length }}</b> possible match{{ results|length|pluralize:"es" }}. Names are partly hidden. A listing is not proof of ownership.</p>
+        {% for r in results %}
+        <div class="result">
+          <div>
+            <b class="name">{{ r.masked_name }}</b> <span class="code">…{{ r.last5 }}</span>
+            <div class="meta"><span>{% include "partials/_icon.html" with name="pin" %} {{ r.area }}</span><span>{% include "partials/_icon.html" with name="clock" %} Reported {{ r.created_at|timesince }} ago</span></div>
+          </div>
+          <a class="btn btn-sm" href="{% url 'public:claim' r.reference %}">{% include "partials/_icon.html" with name="user-check" %} This could be mine</a>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty"><img src="{% static 'img/empty.svg' %}" alt="" width="150" height="105">
+          <p><b>No match for “{{ q }}”.</b><br>It may not have been handed in yet.</p>
+          <a class="btn" href="{% url 'public:lost' %}">{% include "partials/_icon.html" with name="plus" %} Register it as lost</a></div>
+      {% endif %}
+    {% endif %}
+    {% include "partials/_rule.html" %}
+  </div>
+</div>
+{% endblock %}

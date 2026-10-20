@@ -1,0 +1,11 @@
+{% extends "staff/base_staff.html" %}
+{% block stitle %}Claims{% endblock %}
+{% block staff %}
+<div class="page-head"><h1>Claims</h1></div>
+<div class="filters"><a href="?status=open" class="{% if status == 'open' %}active{% endif %}">Open</a>{% for val,label in statuses %}<a href="?status={{ val }}" class="{% if status == val %}active{% endif %}">{{ label }}</a>{% endfor %}</div>
+<div class="table-wrap"><table>
+<thead><tr><th>Claim</th><th>Claimant</th><th>Found ID</th><th>Status</th><th>Requested</th></tr></thead>
+<tbody>{% for c in page %}<tr><td><a href="{% url 'staff:claim_detail' c.pk %}">{{ c.reference }}</a></td><td>{{ c.claimant_name }}</td><td>{{ c.found.reference }} · {{ c.found.masked_name }}</td><td><span class="badge is-{{ c.status }}">{{ c.get_status_display }}</span></td><td>{{ c.created_at|timesince }} ago</td></tr>
+{% empty %}<tr><td colspan="5">No claims here.</td></tr>{% endfor %}</tbody></table></div>
+{% include "partials/_pager.html" %}
+{% endblock %}

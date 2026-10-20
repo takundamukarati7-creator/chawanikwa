@@ -1,0 +1,53 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ SITE_NAME }}{% endblock %}</title>
+<meta name="description" content="Search free for a lost ID found in Zimbabwe, or report one you have found. Safe verification and handover.">
+<link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+<link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+{% block header %}
+<div class="brand-strip">CHAWANIKWA • FOUNDIT • KUTHOLAKELE</div>
+<header class="site-header">
+  <div class="container nav-row">
+    <a class="brand" href="{% url 'public:home' %}">
+      <img src="{% static 'img/logo.svg' %}" alt="" width="40" height="40">
+      <span><b>Chawanikwa</b><small><img src="{% static 'img/flag-zw.svg' %}" alt="" width="18" height="10">Zimbabwe · Found IDs</small></span>
+    </a>
+    <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-label="Menu">{% include "partials/_icon.html" with name="menu" %}</button>
+    <nav class="nav" data-nav aria-label="Main">
+      <a href="{% url 'public:search' %}" {% if request.resolver_match.url_name == 'search' %}class="is-current"{% endif %}>Search</a>
+      <a href="{% url 'public:lost' %}" {% if request.resolver_match.url_name == 'lost' %}class="is-current"{% endif %}>I lost an ID</a>
+      <a href="{% url 'public:found' %}" {% if request.resolver_match.url_name == 'found' %}class="is-current"{% endif %}>I found an ID</a>
+      <a href="{% url 'public:how' %}">How it works</a>
+      <a href="{% url 'public:privacy' %}">Privacy</a>
+      <a class="nav-cta" href="{% url 'staff:login' %}">{% include "partials/_icon.html" with name="user-check" %} Staff sign in</a>
+    </nav>
+  </div>
+</header>
+{% endblock %}
+<main id="main">
+{% if messages %}<div class="container"><ul class="messages">{% for m in messages %}<li class="{{ m.tags }}">{{ m }}</li>{% endfor %}</ul></div>{% endif %}
+{% block content %}{% endblock %}
+</main>
+{% block footer %}
+<footer class="site-footer">
+  <div class="container foot-grid">
+    <div>
+      <b>{{ SITE_NAME }}</b><br>
+      <span class="verse">Luke 15:9 • Rejoice with me, for I have found what was lost</span>
+    </div>
+    <div>
+      <a href="{% url 'public:how' %}">How it works</a> · <a href="{% url 'public:privacy' %}">Privacy</a>
+      {% if SITE_CONTACT_EMAIL %}<br>{{ SITE_CONTACT_EMAIL }}{% endif %}{% if SITE_CONTACT_PHONE %} · {{ SITE_CONTACT_PHONE }}{% endif %}
+    </div>
+  </div>
+</footer>
+{% endblock %}
+<script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

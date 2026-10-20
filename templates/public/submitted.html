@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Received · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<div class="narrow section"><div class="card" role="status">
+  <h2>{% include "partials/_icon.html" with name="found" %} We have your report</h2>
+  <p>Your reference:</p><p><span class="done-ref">{{ reference }}</span></p>
+  {% if kind == "lost" %}
+    <p>If a matching ID is reported and approved, our team will contact you on WhatsApp. Keep your reference.</p>
+  {% else %}
+    <p>A team member will review your report and contact you on the number you gave to arrange a safe handover. Please keep the ID safe until then.</p>
+  {% endif %}
+  <a class="btn" href="{% url 'public:home' %}">{% include "partials/_icon.html" with name="house" %} Back to home</a>
+</div></div>
+{% endblock %}

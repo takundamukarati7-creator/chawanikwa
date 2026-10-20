@@ -1,0 +1,34 @@
+{% extends "staff/base_staff.html" %}
+{% block stitle %}Overview{% endblock %}
+{% block staff %}
+<div class="page-head"><h1>Overview</h1></div>
+<div class="cards6">
+  <a class="kpi {% if stats.pending %}hot{% endif %}" href="{% url 'staff:found_list' %}?status=pending">{% include "partials/_icon.html" with name="inbox" %}<b>{{ stats.pending }}</b><span>Found reports to review</span></a>
+  <a class="kpi" href="{% url 'staff:found_list' %}?status=approved">{% include "partials/_icon.html" with name="locate" %}<b>{{ stats.listed }}</b><span>IDs listed publicly</span></a>
+  <a class="kpi {% if stats.new_matches %}hot{% endif %}" href="{% url 'staff:match_list' %}">{% include "partials/_icon.html" with name="link" %}<b>{{ stats.new_matches }}</b><span>New owner matches to contact</span></a>
+  <a class="kpi {% if stats.open_claims %}hot{% endif %}" href="{% url 'staff:claim_list' %}">{% include "partials/_icon.html" with name="hand" %}<b>{{ stats.open_claims }}</b><span>Open claims</span></a>
+  <a class="kpi" href="{% url 'staff:lost_list' %}">{% include "partials/_icon.html" with name="lost" %}<b>{{ stats.lost_waiting }}</b><span>People waiting (lost)</span></a>
+  <a class="kpi" href="{% url 'staff:found_list' %}?status=collected">{% include "partials/_icon.html" with name="found" %}<b>{{ stats.collected }}</b><span>IDs handed back</span></a>
+</div>
+<div class="two">
+  <div class="panel"><h3>Reports in the last 14 days</h3>
+    <svg class="chart" viewBox="0 0 {{ chart.width }} 176" role="img" aria-label="Found reports and lost registrations per day">
+      <line x1="0" x2="{{ chart.width }}" y1="{{ chart.base }}" y2="{{ chart.base }}" stroke="#e1e7e3"/>
+      {% for b in chart.bars %}
+      <rect x="{{ b.x }}" y="{{ b.fy }}" width="12" height="{{ b.fh }}" rx="2" fill="#16a34a"><title>{{ b.found }} found</title></rect>
+      <rect x="{{ b.lx }}" y="{{ b.ly }}" width="12" height="{{ b.lh }}" rx="2" fill="#f59e0b"><title>{{ b.lost }} lost</title></rect>
+      {% if b.label %}<text x="{{ b.x }}" y="168">{{ b.label }}</text>{% endif %}
+      {% endfor %}
+    </svg>
+    <p class="help">Green: found reports. Amber: lost registrations. Busiest day: {{ chart.peak }}.</p>
+  </div>
+  <div class="panel"><h3>Oldest reports waiting</h3>
+    {% for f in queue %}<p><a href="{% url 'staff:found_detail' f.pk %}">{{ f.reference }}</a> · {{ f.masked_name }} · {{ f.area }} <span class="help">{{ f.created_at|timesince }}</span></p>
+    {% empty %}<p>Nothing waiting. The queue is clear.</p>{% endfor %}
+  </div>
+</div>
+<div class="panel mt"><h3>Recent activity</h3>
+  {% for a in recent %}<p><span class="code">{{ a.action }}</span> {{ a.target }} <span class="help">{{ a.actor.get_username|default:"public" }} · {{ a.created_at|timesince }} ago</span></p>{% empty %}<p>No activity yet.</p>{% endfor %}
+  <a href="{% url 'staff:audit_list' %}">Full audit log</a>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Privacy · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<div class="narrow section">
+  <h1>Privacy</h1>
+  <p>We collect only what the service needs.</p>
+  <h2>What we collect</h2>
+  <p>For found IDs: the name on the ID, its last 5 characters, the place found, and the finder's name and phone. For lost IDs: the name, last 5 characters and your WhatsApp number. For claims: your name and WhatsApp number. We never store photos of IDs or full ID numbers, and we do not record the number of the alternative ID shown at handover.</p>
+  <h2>What the public sees</h2>
+  <p>Only a partly hidden name, the last 5 characters and the town. Phone numbers and exact places are visible to authorised staff only.</p>
+  <h2>How long we keep it</h2>
+  <p>Completed or rejected found reports are deleted after {{ RETENTION_FOUND }} days. Lost registrations are deleted after {{ RETENTION_LOST }} days once closed or matched. To ask for earlier deletion, contact us{% if SITE_CONTACT_EMAIL %} at {{ SITE_CONTACT_EMAIL }}{% endif %}.</p>
+</div>
+{% endblock %}

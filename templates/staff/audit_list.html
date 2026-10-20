@@ -1,0 +1,10 @@
+{% extends "staff/base_staff.html" %}
+{% block stitle %}Audit log{% endblock %}
+{% block staff %}
+<div class="page-head"><h1>Audit log</h1></div>
+<div class="table-wrap"><table>
+<thead><tr><th>When</th><th>Who</th><th>Action</th><th>Target</th><th>Detail</th><th>IP</th></tr></thead>
+<tbody>{% for a in page %}<tr><td>{{ a.created_at|date:"d M Y H:i" }}</td><td>{{ a.actor.get_username|default:"public" }}</td><td><span class="code">{{ a.action }}</span></td><td>{{ a.target }}</td><td>{{ a.detail }}</td><td>{{ a.ip|default:"" }}</td></tr>
+{% empty %}<tr><td colspan="6">No activity yet.</td></tr>{% endfor %}</tbody></table></div>
+{% include "partials/_pager.html" %}
+{% endblock %}

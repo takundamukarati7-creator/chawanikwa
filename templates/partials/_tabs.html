@@ -1,0 +1,5 @@
+<nav class="tabs" aria-label="Choose what you want to do">
+  <a href="{% url 'public:search' %}" class="{% if active == 'search' %}active{% endif %}">{% include "partials/_icon.html" with name="search" %} Search</a>
+  <a href="{% url 'public:lost' %}" class="{% if active == 'lost' %}active{% endif %}">{% include "partials/_icon.html" with name="lost" %} I lost an ID</a>
+  <a href="{% url 'public:found' %}" class="{% if active == 'found' %}active{% endif %}">{% include "partials/_icon.html" with name="found" %} I found an ID</a>
+</nav>

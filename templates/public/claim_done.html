@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Claim received · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<div class="narrow section"><div class="card" role="status">
+  <h2>{% include "partials/_icon.html" with name="found" %} Claim received</h2>
+  <p>Your claim reference:</p><p><span class="done-ref">{{ reference }}</span></p>
+  <p>An agent will contact you on WhatsApp at <b>{{ phone }}</b>. Bring a Passport, Driver's Licence or Birth Certificate. Without one, the ID cannot be handed over.</p>
+  <a class="btn" href="{% url 'public:home' %}">{% include "partials/_icon.html" with name="house" %} Back to home</a>
+</div></div>
+{% endblock %}

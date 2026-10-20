@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% load static %}
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block title %}Staff sign in · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<div class="login-wrap"><div class="card">
+  <a class="brand" href="{% url 'public:home' %}"><img src="{% static 'img/logo.svg' %}" alt="" width="40" height="40"><span><b>Found It</b><small>Staff sign in</small></span></a>
+  <form method="post" novalidate>{% csrf_token %}
+    {% if form.non_field_errors %}<div class="form-errors" role="alert">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+    <input type="hidden" name="next" value="{{ next }}">
+    {% include "partials/_field.html" with field=form.username %}
+    {% include "partials/_field.html" with field=form.password %}
+    <button class="btn btn-block" type="submit">{% include "partials/_icon.html" with name="lock" %} Sign in</button>
+  </form>
+  <p class="help">Staff only. Searching for an ID does not need an account.</p>
+</div></div>
+{% endblock %}

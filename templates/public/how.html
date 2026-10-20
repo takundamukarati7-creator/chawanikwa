@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}How it works · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<div class="narrow section">
+  <h1>How it works</h1>
+  <h2>If you lost an ID</h2>
+  <p>Search by name or the last 5 characters. If you see it, start a claim. If not, register it as lost and we will contact you if it is reported.</p>
+  <h2>If you found an ID</h2>
+  <p>Report the name and last 5 characters. Do not photograph the ID or share it online. A team member reviews each report before it appears in search. We do not say a report is genuine until it has been checked.</p>
+  <h2>Handover</h2>
+  <p>We only hand an ID over after an agent sees the owner's Passport, Driver's Licence or Birth Certificate in person and the name matches. Every step is recorded.</p>
+  {% include "partials/_rule.html" %}
+</div>
+{% endblock %}

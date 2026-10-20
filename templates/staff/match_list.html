@@ -1,0 +1,16 @@
+{% extends "staff/base_staff.html" %}
+{% block stitle %}Matches{% endblock %}
+{% block staff %}
+<div class="page-head"><h1>Possible owner matches</h1></div>
+<p>The app does not send messages by itself. Use the WhatsApp button, then mark the owner as contacted.</p>
+<div class="filters">{% for val,label in statuses %}<a href="?status={{ val }}" class="{% if status == val %}active{% endif %}">{{ label }}</a>{% endfor %}</div>
+<div class="table-wrap"><table>
+<thead><tr><th>Owner (lost)</th><th>Found ID</th><th>Area</th><th>Status</th><th>Action</th></tr></thead>
+<tbody>{% for m in page %}<tr><td><a href="{% url 'staff:lost_detail' m.lost.pk %}">{{ m.lost.reference }}</a> · {{ m.lost.full_name }}<br><span class="help">{{ m.lost.phone }}</span></td>
+<td><a href="{% url 'staff:found_detail' m.found.pk %}">{{ m.found.reference }}</a></td><td>{{ m.found.area }}</td><td><span class="badge is-{{ m.status }}">{{ m.get_status_display }}</span></td>
+<td><a class="btn btn-sm" href="{{ m.wa_web_link }}" target="_blank" rel="noopener noreferrer">{% include "partials/_icon.html" with name="whatsapp" %} WhatsApp Web</a>
+<a class="btn btn-outline btn-sm" href="{{ m.wa_link }}" target="_blank" rel="noopener noreferrer">{% include "partials/_icon.html" with name="whatsapp" %} WhatsApp app</a>
+{% if m.status == "new" %}<form class="inline" method="post" action="{% url 'staff:match_contacted' m.pk %}">{% csrf_token %}<button class="btn btn-outline btn-sm" type="submit">{% include "partials/_icon.html" with name="check" %} Mark contacted</button></form>{% endif %}</td></tr>
+{% empty %}<tr><td colspan="5">No matches here.</td></tr>{% endfor %}</tbody></table></div>
+{% include "partials/_pager.html" %}
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "staff/base_staff.html" %}
+{% block stitle %}{{ found.reference }}{% endblock %}
+{% block staff %}
+<div class="page-head"><h1>{{ found.reference }} <span class="badge is-{{ found.status }}">{{ found.get_status_display }}</span></h1><a class="btn btn-outline btn-sm" href="{% url 'staff:found_list' %}">Back to list</a></div>
+<div class="two">
+  <div class="panel"><h3>Report details (private)</h3>
+    <dl class="kv"><dt>Name on ID</dt><dd>{{ found.full_name }}</dd><dt>Last 5 characters</dt><dd><span class="code">{{ found.last5 }}</span></dd>
+    <dt>Public listing shows</dt><dd>{{ found.masked_name }} · …{{ found.last5 }} · {{ found.area }}</dd>
+    <dt>Exact place found</dt><dd>{{ found.location_detail }}</dd><dt>Finder</dt><dd>{{ found.holder_name }}</dd><dt>Finder phone</dt><dd>{{ found.holder_phone }}</dd>
+    <dt>Finder confirmed seen</dt><dd>{{ found.seen_confirmed|yesno:"Yes,No" }}</dd><dt>Reported</dt><dd>{{ found.created_at }}</dd>
+    {% if found.reviewed_at %}<dt>Reviewed</dt><dd>{{ found.reviewed_at }} by {{ found.reviewed_by.get_username|default:"-" }}</dd>{% endif %}
+    {% if found.review_note %}<dt>Note</dt><dd>{{ found.review_note }}</dd>{% endif %}</dl>
+  </div>
+  <div class="stack">
+    {% if found.status == "pending" or found.status == "approved" %}
+    <div class="panel"><h3>Decision</h3>
+      {% if found.status == "pending" %}
+      <p>Approving lists a partly hidden entry in public search. This is a review of a finder's report, not proof the ID is genuine.</p>
+      <form method="post" data-confirm="List this ID in public search?">{% csrf_token %}<input type="hidden" name="action" value="approve">
+        {% include "partials/_field.html" with field=approve_form.note %}<button class="btn mt" type="submit">{% include "partials/_icon.html" with name="check" %} Approve and list</button></form>
+      {% endif %}
+      <form method="post" class="mt" data-confirm="Reject and remove this report from public search?">{% csrf_token %}<input type="hidden" name="action" value="reject">
+        {% include "partials/_field.html" with field=reject_form.note %}<button class="btn btn-danger mt" type="submit">{% include "partials/_icon.html" with name="x" %} {% if found.status == "approved" %}Withdraw listing{% else %}Reject{% endif %}</button></form>
+    </div>
+    {% endif %}
+    <div class="panel"><h3>Possible owners</h3>
+      {% for m in matches %}<p><a href="{% url 'staff:lost_detail' m.lost.pk %}">{{ m.lost.reference }}</a> · {{ m.lost.masked_name }} <span class="badge is-{{ m.status }}">{{ m.get_status_display }}</span></p>{% empty %}<p>No matching lost registrations.</p>{% endfor %}
+    </div>
+    <div class="panel"><h3>Claims</h3>
+      {% for c in claims %}<p><a href="{% url 'staff:claim_detail' c.pk %}">{{ c.reference }}</a> · {{ c.claimant_name }} <span class="badge is-{{ c.status }}">{{ c.get_status_display }}</span></p>{% empty %}<p>No claims yet.</p>{% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

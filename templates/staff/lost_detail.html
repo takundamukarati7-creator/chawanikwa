@@ -1,0 +1,16 @@
+{% extends "staff/base_staff.html" %}
+{% block stitle %}{{ lost.reference }}{% endblock %}
+{% block staff %}
+<div class="page-head"><h1>{{ lost.reference }} <span class="badge is-{{ lost.status }}">{{ lost.get_status_display }}</span></h1><a class="btn btn-outline btn-sm" href="{% url 'staff:lost_list' %}">Back to list</a></div>
+<div class="two">
+  <div class="panel"><h3>Registration (private)</h3>
+    <dl class="kv"><dt>Name</dt><dd>{{ lost.full_name }}</dd><dt>Last 5</dt><dd><span class="code">{{ lost.last5 }}</span></dd><dt>WhatsApp</dt><dd>{{ lost.phone }}</dd><dt>Area</dt><dd>{{ lost.area }}</dd><dt>Where lost</dt><dd>{{ lost.location_detail|default:"-" }}</dd><dt>Registered</dt><dd>{{ lost.created_at }}</dd></dl>
+    {% if lost.status != "closed" %}<form method="post" class="mt" data-confirm="Close this registration?">{% csrf_token %}<input type="hidden" name="action" value="close"><button class="btn btn-outline" type="submit">{% include "partials/_icon.html" with name="lock" %} Close registration</button></form>{% endif %}
+  </div>
+  <div class="panel"><h3>Possible matches</h3>
+    {% for m in matches %}<p><a href="{% url 'staff:found_detail' m.found.pk %}">{{ m.found.reference }}</a> · {{ m.found.masked_name }} · {{ m.found.area }} <span class="badge is-{{ m.status }}">{{ m.get_status_display }}</span><br>
+    <a class="btn btn-sm mt" href="{{ m.wa_web_link }}" target="_blank" rel="noopener noreferrer">{% include "partials/_icon.html" with name="whatsapp" %} Message owner on WhatsApp Web</a>
+    <a class="btn btn-outline btn-sm mt" href="{{ m.wa_link }}" target="_blank" rel="noopener noreferrer">{% include "partials/_icon.html" with name="whatsapp" %} Use WhatsApp app</a></p>{% empty %}<p>No match yet. If a matching ID is approved, it will appear here.</p>{% endfor %}
+  </div>
+</div>
+{% endblock %}

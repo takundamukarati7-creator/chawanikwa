@@ -1,0 +1,61 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}{{ SITE_NAME }} · Find a lost ID in Zimbabwe{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <h1>Lost your ID? Check if someone has found it.</h1>
+      <p class="lead">Search is free and needs no account. Finders hand IDs in, our team checks each report, and owners collect with proof.</p>
+      <div class="card">
+        {% include "partials/_tabs.html" with active="search" %}
+        <form action="{% url 'public:search' %}" method="get" role="search">
+          <label for="q" class="skip">Name or last 5 characters</label>
+          <div class="searchbar">
+            <input id="q" name="q" placeholder="Name or last 5 e.g. 50E63" autocomplete="off" required>
+            <button class="btn btn-dark" type="submit">{% include "partials/_icon.html" with name="search" %} Search now</button>
+          </div>
+          <p class="help">Type at least 3 letters of the name, or the last 5 characters on the ID.</p>
+        </form>
+      </div>
+      <p class="verse">Luke 15:9 • Rejoice with me, for I have found what was lost</p>
+    </div>
+    <div class="hero-art"><img src="{% static 'img/hero.svg' %}" alt="" width="520" height="420"></div>
+  </div>
+</section>
+
+<div class="container">
+  <div class="stats" aria-label="Live figures from our records">
+    <div class="stat"><div class="stat-ic">{% include "partials/_icon.html" with name="id" %}</div><b>{{ stats.listed }}</b><span class="lbl">IDs waiting to be collected</span></div>
+    <div class="stat"><div class="stat-ic">{% include "partials/_icon.html" with name="heart" %}</div><b>{{ stats.reunited }}</b><span class="lbl">IDs returned to owners</span></div>
+    <div class="stat"><div class="stat-ic">{% include "partials/_icon.html" with name="users" %}</div><b>{{ stats.lost_registered }}</b><span class="lbl">People registered as lost</span></div>
+    <div class="stat"><div class="stat-ic">{% include "partials/_icon.html" with name="pin" %}</div><b>{{ stats.towns }}</b><span class="lbl">Towns with IDs listed</span></div>
+  </div>
+</div>
+
+<section class="section container">
+  <h2>How getting your ID back works</h2>
+  <ol class="steps">
+    <li><div class="step-ic">{% include "partials/_icon.html" with name="search" %}</div><h3>Search</h3><p>Look up your name or the last 5 characters. Names are partly hidden to protect owners.</p></li>
+    <li><div class="step-ic">{% include "partials/_icon.html" with name="send" %}</div><h3>Start a claim</h3><p>Give your name and WhatsApp number. Nothing is handed over yet.</p></li>
+    <li><div class="step-ic">{% include "partials/_icon.html" with name="id" %}</div><h3>Prove it is yours</h3><p>An agent checks a Passport, Driver's Licence or Birth Certificate in person.</p></li>
+    <li><div class="step-ic">{% include "partials/_icon.html" with name="hand" %}</div><h3>Collect</h3><p>Once your identity is confirmed, the ID is handed over and the record is closed.</p></li>
+  </ol>
+  {% include "partials/_rule.html" %}
+</section>
+
+<section class="section container">
+  <div class="two">
+    <div class="panel"><h3>{% include "partials/_icon.html" with name="shield" %} What we show publicly</h3>
+      <ul><li>A partly hidden name, like <b>Tin***e M.</b></li><li>The last 5 characters of the ID</li><li>The town where it was found</li></ul></div>
+    <div class="panel is-no"><h3>{% include "partials/_icon.html" with name="eye-off" %} What we never show</h3>
+      <ul><li>Photos of any ID</li><li>Full ID numbers</li><li>Finder or owner phone numbers</li><li>Exact places or who handed it in</li></ul></div>
+  </div>
+</section>
+
+<section class="section container">
+  <div class="cta-band">
+    <div class="card card-plain"><h3>{% include "partials/_icon.html" with name="lost" %} Lost an ID?</h3><p>Register it once. If a matching ID is reported, our team contacts you on WhatsApp.</p><a class="btn btn-block" href="{% url 'public:lost' %}">{% include "partials/_icon.html" with name="plus" %} Register a lost ID</a></div>
+    <div class="card card-plain"><h3>{% include "partials/_icon.html" with name="found" %} Found an ID?</h3><p>Report it so its owner can be found. Do not photograph it or post it online.</p><a class="btn btn-outline btn-block" href="{% url 'public:found' %}">{% include "partials/_icon.html" with name="send" %} Report a found ID</a></div>
+  </div>
+</section>
+{% endblock %}

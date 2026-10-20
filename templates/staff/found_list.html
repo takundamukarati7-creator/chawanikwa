@@ -1,0 +1,12 @@
+{% extends "staff/base_staff.html" %}{% load dash %}
+{% block stitle %}Found reports{% endblock %}
+{% block staff %}
+<div class="page-head"><h1>Found reports</h1>
+  <form method="get" class="searchbar"><input type="hidden" name="status" value="{{ status }}"><input name="q" value="{{ q }}" placeholder="Reference, last 5 or name"><button class="btn btn-dark btn-sm" type="submit">{% include "partials/_icon.html" with name="search" %} Find</button></form></div>
+<div class="filters">{% for val,label in statuses %}<a href="?status={{ val }}" class="{% if status == val %}active{% endif %}">{{ label }} ({{ counts|get:val }})</a>{% endfor %}</div>
+<div class="table-wrap"><table>
+<thead><tr><th>Reference</th><th>Name on ID</th><th>Last 5</th><th>Area</th><th>Status</th><th>Reported</th></tr></thead>
+<tbody>{% for f in page %}<tr><td><a href="{% url 'staff:found_detail' f.pk %}">{{ f.reference }}</a></td><td>{{ f.full_name }}</td><td><span class="code">{{ f.last5 }}</span></td><td>{{ f.area }}</td><td><span class="badge is-{{ f.status }}">{{ f.get_status_display }}</span></td><td>{{ f.created_at|timesince }} ago</td></tr>
+{% empty %}<tr><td colspan="6">Nothing here.</td></tr>{% endfor %}</tbody></table></div>
+{% include "partials/_pager.html" %}
+{% endblock %}

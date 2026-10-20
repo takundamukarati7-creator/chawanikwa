@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% load static %}
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block title %}{% block stitle %}Dashboard{% endblock %} · Staff · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<div class="staff-shell">
+  <aside class="side" aria-label="Staff navigation">
+    <a class="brand" href="{% url 'staff:overview' %}"><img src="{% static 'img/logo.svg' %}" alt="" width="36" height="36"><span><b>Found It</b><small>Staff dashboard</small></span></a>
+    <a href="{% url 'staff:overview' %}" class="{% if nav == 'overview' %}is-current{% endif %}">{% include "partials/_icon.html" with name="grid" %}<span>Overview</span></a>
+    <a href="{% url 'staff:found_list' %}" class="{% if nav == 'found' %}is-current{% endif %}">{% include "partials/_icon.html" with name="id" %}<span>Found reports</span></a>
+    <a href="{% url 'staff:lost_list' %}" class="{% if nav == 'lost' %}is-current{% endif %}">{% include "partials/_icon.html" with name="lost" %}<span>Lost registrations</span></a>
+    <a href="{% url 'staff:match_list' %}" class="{% if nav == 'matches' %}is-current{% endif %}">{% include "partials/_icon.html" with name="link" %}<span>Matches</span></a>
+    <a href="{% url 'staff:claim_list' %}" class="{% if nav == 'claims' %}is-current{% endif %}">{% include "partials/_icon.html" with name="hand" %}<span>Claims</span></a>
+    <a href="{% url 'staff:audit_list' %}" class="{% if nav == 'audit' %}is-current{% endif %}">{% include "partials/_icon.html" with name="list" %}<span>Audit log</span></a>
+    <span class="grow"></span>
+    <a href="{% url 'public:home' %}">{% include "partials/_icon.html" with name="globe" %}<span>View public site</span></a>
+    <form method="post" action="{% url 'staff:logout' %}">{% csrf_token %}<button class="linklike" type="submit">{% include "partials/_icon.html" with name="out" %}<span>Sign out ({{ request.user.get_username }})</span></button></form>
+  </aside>
+  <div class="staff-main">
+    {% if messages %}<ul class="messages">{% for m in messages %}<li class="{{ m.tags }}">{{ m }}</li>{% endfor %}</ul>{% endif %}
+    {% block staff %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

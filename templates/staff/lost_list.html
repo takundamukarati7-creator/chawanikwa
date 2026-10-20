@@ -1,0 +1,11 @@
+{% extends "staff/base_staff.html" %}
+{% block stitle %}Lost registrations{% endblock %}
+{% block staff %}
+<div class="page-head"><h1>Lost registrations</h1>
+  <form method="get" class="searchbar"><input name="q" value="{{ q }}" placeholder="Reference, last 5 or name"><button class="btn btn-dark btn-sm" type="submit">{% include "partials/_icon.html" with name="search" %} Find</button></form></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Reference</th><th>Name</th><th>Last 5</th><th>Area</th><th>Status</th><th>Registered</th></tr></thead>
+<tbody>{% for l in page %}<tr><td><a href="{% url 'staff:lost_detail' l.pk %}">{{ l.reference }}</a></td><td>{{ l.full_name }}</td><td><span class="code">{{ l.last5 }}</span></td><td>{{ l.area }}</td><td><span class="badge is-{{ l.status }}">{{ l.get_status_display }}</span></td><td>{{ l.created_at|timesince }} ago</td></tr>
+{% empty %}<tr><td colspan="6">Nothing here.</td></tr>{% endfor %}</tbody></table></div>
+{% include "partials/_pager.html" %}
+{% endblock %}

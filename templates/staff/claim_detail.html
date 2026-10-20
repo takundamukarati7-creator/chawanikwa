@@ -1,0 +1,34 @@
+{% extends "staff/base_staff.html" %}
+{% block stitle %}{{ claim.reference }}{% endblock %}
+{% block staff %}
+<div class="page-head"><h1>{{ claim.reference }} <span class="badge is-{{ claim.status }}">{{ claim.get_status_display }}</span></h1><a class="btn btn-outline btn-sm" href="{% url 'staff:claim_list' %}">Back to claims</a></div>
+<div class="two">
+  <div class="panel"><h3>Claim details (private)</h3>
+    <dl class="kv"><dt>Claimant</dt><dd>{{ claim.claimant_name }}</dd><dt>WhatsApp</dt><dd>{{ claim.claimant_phone }}</dd>
+    <dt>Found ID</dt><dd><a href="{% url 'staff:found_detail' claim.found.pk %}">{{ claim.found.reference }}</a> · name on ID: {{ claim.found.full_name }} · …{{ claim.found.last5 }}</dd>
+    <dt>Requested</dt><dd>{{ claim.created_at }}</dd>
+    {% if claim.alt_id_type %}<dt>Alternative ID shown</dt><dd>{{ claim.get_alt_id_type_display }}</dd>{% endif %}
+    {% if claim.handled_by %}<dt>Handled by</dt><dd>{{ claim.handled_by.get_username }}</dd>{% endif %}
+    {% if claim.notes %}<dt>Notes</dt><dd>{{ claim.notes }}</dd>{% endif %}
+    {% if claim.collected_at %}<dt>Handed over</dt><dd>{{ claim.collected_at }}</dd>{% endif %}</dl>
+    <p class="mt"><a class="btn btn-sm" href="{{ wa_web_link }}" target="_blank" rel="noopener noreferrer">{% include "partials/_icon.html" with name="whatsapp" %} Message claimant on WhatsApp Web</a>
+    <a class="btn btn-outline btn-sm" href="{{ wa_link }}" target="_blank" rel="noopener noreferrer">{% include "partials/_icon.html" with name="whatsapp" %} Use WhatsApp app</a></p>
+  </div>
+  <div class="stack">
+    {% if claim.status == "requested" %}
+    <div class="panel"><h3>Verify in person</h3>
+      <p>Check the claimant's Passport, Driver's Licence or Birth Certificate. Do not record its number or photograph it.</p>
+      <form method="post">{% csrf_token %}<input type="hidden" name="action" value="verify">
+        {% include "partials/_field.html" with field=verify_form.alt_id_type %}{% include "partials/_field.html" with field=verify_form.name_matches %}{% include "partials/_field.html" with field=verify_form.notes %}
+        <button class="btn mt" type="submit">{% include "partials/_icon.html" with name="verify" %} Confirm owner verified</button></form></div>
+    {% elif claim.status == "verified" %}
+    <div class="panel"><h3>Hand over</h3><p>Only press this when the ID has physically been given to the verified owner.</p>
+      <form method="post" data-confirm="Record that the ID was handed over? This removes it from public search.">{% csrf_token %}<input type="hidden" name="action" value="collect"><button class="btn" type="submit">{% include "partials/_icon.html" with name="hand" %} Record handover</button></form></div>
+    {% endif %}
+    {% if claim.status == "requested" or claim.status == "verified" %}
+    <div class="panel"><h3>Reject claim</h3>
+      <form method="post" data-confirm="Reject this claim?">{% csrf_token %}<input type="hidden" name="action" value="reject">{% include "partials/_field.html" with field=note_form.notes %}<button class="btn btn-danger mt" type="submit">{% include "partials/_icon.html" with name="x" %} Reject claim</button></form></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
