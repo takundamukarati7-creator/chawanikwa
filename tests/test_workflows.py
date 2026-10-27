@@ -484,3 +484,84 @@ class CommandTests(Base):
         self.assertEqual(Match.objects.count(), 1)
         call_command("seed_demo", "--clear", stdout=StringIO())
         self.assertEqual(FoundReport.objects.count(), 0)
+
+
+class MultiCountryTests(Base):
+    ZA_FOUND = dict(FOUND_DATA, country="ZA", last5="08083", area="Johannesburg", holder_phone="082 123 4567",
+                    full_name="Thabo Mokoena")
+    US_LOST = dict(LOST_DATA, country="US", last5="4x9k2", area="Texas", phone="(212) 555-0123",
+                   full_name="Jordan Smith")
+
+    def test_phone_normalisation_per_country(self):
+        self.assertEqual(normalize_phone("082 123 4567", "ZA"), "+27821234567")
+        self.assertEqual(normalize_phone("27821234567", "ZA"), "+27821234567")
+        self.assertEqual(normalize_phone("(212) 555-0123", "US"), "+12125550123")
+        self.assertEqual(normalize_phone("+263771234567", "US"), "+263771234567")  # international always ok
+        self.assertEqual(normalize_phone("0771234567"), "+263771234567")  # default stays Zimbabwe
+        with self.assertRaises(ValidationError):
+            normalize_phone("12345", "US")
+
+    def test_south_africa_found_report_saved_with_country_and_phone(self):
+        r = self.client.post(reverse("public:found"), self.ZA_FOUND)
+        self.assertEqual(r.status_code, 302, getattr(r, "context", None) and r.context["form"].errors)
+        f = FoundReport.objects.get()
+        self.assertEqual((f.country, f.area, f.last5, f.holder_phone), ("ZA", "Johannesburg", "08083", "+27821234567"))
+
+    def test_last5_rules_follow_the_country(self):
+        bad = dict(self.ZA_FOUND, last5="08E83")  # South African IDs are digits only
+        self.assertEqual(self.client.post(reverse("public:found"), bad).status_code, 200)
+        self.assertEqual(FoundReport.objects.count(), 0)
+
+    def test_area_must_belong_to_the_chosen_country(self):
+        bad = dict(self.ZA_FOUND, area="Harare")
+        r = self.client.post(reverse("public:found"), bad)
+        self.assertEqual(r.status_code, 200)
+        self.assertIn("area", r.context["form"].errors)
+
+    def test_usa_lost_registration(self):
+        r = self.client.post(reverse("public:lost"), self.US_LOST)
+        self.assertEqual(r.status_code, 302, getattr(r, "context", None) and r.context["form"].errors)
+        lost = LostReport.objects.get()
+        self.assertEqual((lost.country, lost.area, lost.last5, lost.phone), ("US", "Texas", "4X9K2", "+12125550123"))
+
+    def test_missing_country_defaults_to_zimbabwe(self):
+        self.client.post(reverse("public:found"), FOUND_DATA)
+        self.assertEqual(FoundReport.objects.get().country, "ZW")
+
+    def test_search_filters_by_country_and_shows_it(self):
+        make_found()
+        make_found(country="ZA", full_name="Thabo Mokoena", last5="08083", area="Cape Town")
+        r = self.client.get(reverse("public:search"), {"q": "08083", "country": "ZA"})
+        self.assertContains(r, "Cape Town, South Africa")
+        r = self.client.get(reverse("public:search"), {"q": "Tinashe", "country": "ZA"})
+        self.assertNotContains(r, "Harare")
+        r = self.client.get(reverse("public:search"), {"q": "Tinashe"})  # all countries
+        self.assertContains(r, "Harare, Zimbabwe")
+
+    def test_reports_only_match_inside_the_same_country(self):
+        make_found()  # Zimbabwe, 50E63
+        LostReport.objects.create(full_name="Tinashe Moyo", last5="50E63", phone="+12125550123",
+                                  area="Texas", country="US", consent=True)
+        from reports import matching
+        lost = LostReport.objects.get()
+        self.assertEqual(matching.match_for_lost(lost), 0)
+        lost2 = LostReport.objects.create(full_name="Tinashe Moyo", last5="50E63", phone="+263770000001",
+                                          area="Harare", consent=True)
+        self.assertEqual(matching.match_for_lost(lost2), 1)
+
+    def test_claim_uses_the_countrys_phone_rules_and_documents(self):
+        f = make_found(country="US", full_name="Jordan Smith", last5="4X9K2", area="Texas")
+        r = self.client.get(reverse("public:claim", args=[f.reference]))
+        self.assertContains(r, "government-issued photo ID")
+        r = self.client.post(reverse("public:claim", args=[f.reference]),
+                             {"claimant_name": "Jordan Smith", "claimant_phone": "2125550123",
+                              "understood": "on", "website": ""})
+        self.assertEqual(r.status_code, 302)
+        self.assertEqual(Claim.objects.get().claimant_phone, "+12125550123")
+
+    def test_forms_offer_every_country_without_inline_scripts(self):
+        for name in ["lost", "found"]:
+            html = self.client.get(reverse(f"public:{name}")).content.decode()
+            for country in ("Zimbabwe", "South Africa", "United States"):
+                self.assertIn(country, html)
+            self.assertNotIn("<script>", html)
