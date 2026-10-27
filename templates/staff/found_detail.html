@@ -4,8 +4,8 @@
 <div class="page-head"><h1>{{ found.reference }} <span class="badge is-{{ found.status }}">{{ found.get_status_display }}</span></h1><a class="btn btn-outline btn-sm" href="{% url 'staff:found_list' %}">Back to list</a></div>
 <div class="two">
   <div class="panel"><h3>Report details (private)</h3>
-    <dl class="kv"><dt>Name on ID</dt><dd>{{ found.full_name }}</dd><dt>Last 5 characters</dt><dd><span class="code">{{ found.last5 }}</span></dd>
-    <dt>Public listing shows</dt><dd>{{ found.masked_name }} · …{{ found.last5 }} · {{ found.area }}</dd>
+    <dl class="kv"><dt>Country</dt><dd>{{ found.get_country_display }}</dd><dt>Name on ID</dt><dd>{{ found.full_name }}</dd><dt>Last 5 characters</dt><dd><span class="code">{{ found.last5 }}</span></dd>
+    <dt>Public listing shows</dt><dd>{{ found.masked_name }} · …{{ found.last5 }} · {{ found.area }}, {{ found.get_country_display }}</dd>
     <dt>Exact place found</dt><dd>{{ found.location_detail }}</dd><dt>Finder</dt><dd>{{ found.holder_name }}</dd><dt>Finder phone</dt><dd>{{ found.holder_phone }}</dd>
     <dt>Finder confirmed seen</dt><dd>{{ found.seen_confirmed|yesno:"Yes,No" }}</dd><dt>Reported</dt><dd>{{ found.created_at }}</dd>
     {% if found.reviewed_at %}<dt>Reviewed</dt><dd>{{ found.reviewed_at }} by {{ found.reviewed_by.get_username|default:"-" }}</dd>{% endif %}

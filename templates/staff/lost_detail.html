@@ -4,7 +4,7 @@
 <div class="page-head"><h1>{{ lost.reference }} <span class="badge is-{{ lost.status }}">{{ lost.get_status_display }}</span></h1><a class="btn btn-outline btn-sm" href="{% url 'staff:lost_list' %}">Back to list</a></div>
 <div class="two">
   <div class="panel"><h3>Registration (private)</h3>
-    <dl class="kv"><dt>Name</dt><dd>{{ lost.full_name }}</dd><dt>Last 5</dt><dd><span class="code">{{ lost.last5 }}</span></dd><dt>WhatsApp</dt><dd>{{ lost.phone }}</dd><dt>Area</dt><dd>{{ lost.area }}</dd><dt>Where lost</dt><dd>{{ lost.location_detail|default:"-" }}</dd><dt>Registered</dt><dd>{{ lost.created_at }}</dd></dl>
+    <dl class="kv"><dt>Country</dt><dd>{{ lost.get_country_display }}</dd><dt>Name</dt><dd>{{ lost.full_name }}</dd><dt>Last 5</dt><dd><span class="code">{{ lost.last5 }}</span></dd><dt>WhatsApp</dt><dd>{{ lost.phone }}</dd><dt>Area</dt><dd>{{ lost.area }}</dd><dt>Where lost</dt><dd>{{ lost.location_detail|default:"-" }}</dd><dt>Registered</dt><dd>{{ lost.created_at }}</dd></dl>
     {% if lost.status != "closed" %}<form method="post" class="mt" data-confirm="Close this registration?">{% csrf_token %}<input type="hidden" name="action" value="close"><button class="btn btn-outline" type="submit">{% include "partials/_icon.html" with name="lock" %} Close registration</button></form>{% endif %}
   </div>
   <div class="panel"><h3>Possible matches</h3>
