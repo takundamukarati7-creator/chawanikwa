@@ -71,6 +71,8 @@ input[type=checkbox]{width:auto;margin:3px 8px 0 0;accent-color:var(--green);fle
 .tabs a.active{background:var(--green);color:#fff}
 .searchbar{display:flex;gap:8px}
 .searchbar input{margin:0;flex:1}
+.searchbar select.country-select{margin:0;width:auto;flex:none;max-width:42%}
+@media (max-width:560px){.searchbar{flex-wrap:wrap}.searchbar select.country-select{max-width:none;width:100%}.searchbar input{min-width:60%}}
 .warn{margin:18px 0;padding:12px 14px;background:var(--warn-bg);border:1px dashed var(--warn-line);border-radius:8px;font-size:.85rem;line-height:1.45}
 
 /* Hero */
