@@ -6,6 +6,7 @@ from django.views.decorators.http import require_GET, require_http_methods
 
 from reports import matching
 from reports.audit import log_action
+from reports.countries import get_country
 from reports.forms import ClaimForm, FoundForm, LostForm, SearchForm
 from reports.models import Claim, FoundReport, LostReport, Match
 from reports.throttle import is_limited
@@ -23,7 +24,7 @@ def _public_stats():
     }
 
 
-def search_found(query: str):
+def search_found(query: str, country: str = ""):
     """Return approved reports matching a name fragment or an exact last-5 code."""
     raw = query.strip()
     key = normalize_name(raw)
@@ -37,7 +38,10 @@ def search_found(query: str):
         cond |= name_q
     if not cond:
         return None
-    return FoundReport.objects.filter(cond, status=FoundReport.Status.APPROVED).order_by("-created_at")[:MAX_RESULTS]
+    qs = FoundReport.objects.filter(cond, status=FoundReport.Status.APPROVED)
+    if country:
+        qs = qs.filter(country=country)
+    return qs.order_by("-created_at")[:MAX_RESULTS]
 
 
 @require_GET
@@ -49,13 +53,14 @@ def home(request):
 def results(request):
     form = SearchForm(request.GET)
     q = (request.GET.get("q") or "").strip()
-    ctx = {"form": form, "q": q, "results": None, "error": None}
+    country = form.cleaned_data.get("country", "") if form.is_valid() else ""
+    ctx = {"form": form, "q": q, "country": country, "results": None, "error": None}
     if not q:
         return render(request, "public/search.html", ctx)
     if is_limited(request, "search"):
         ctx["error"] = "You are searching very quickly. Please wait a minute and try again."
         return render(request, "public/search.html", ctx, status=429)
-    found = search_found(q)
+    found = search_found(q, country)
     if found is None:
         ctx["error"] = "Type at least 3 letters of the name, or the last 5 characters of the ID."
         return render(request, "public/search.html", ctx)
@@ -107,7 +112,7 @@ def claim(request, reference):
     except FoundReport.DoesNotExist:
         raise Http404
     if request.method == "POST":
-        form = ClaimForm(request.POST)
+        form = ClaimForm(request.POST, country=found.country)
         if is_limited(request, "claim"):
             form.add_error(None, "Too many claim requests from this connection. Please try again later.")
             return render(request, "public/claim.html", {"form": form, "found": found}, status=429)
@@ -122,10 +127,13 @@ def claim(request, reference):
                 obj.found = found
                 obj.save()
                 log_action(request, "claim.requested", obj.reference, f"for {found.reference}")
-            request.session["claim_done"] = {"reference": obj.reference, "phone": obj.claimant_phone}
+            request.session["claim_done"] = {
+                "reference": obj.reference, "phone": obj.claimant_phone,
+                "alt_ids": get_country(found.country)["alt_ids"],
+            }
             return redirect("public:claim_done")
     else:
-        form = ClaimForm()
+        form = ClaimForm(country=found.country)
     return render(request, "public/claim.html", {"form": form, "found": found})
 
 
