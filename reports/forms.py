@@ -1,8 +1,9 @@
 from django import forms
 from django.core.exceptions import ValidationError
 
-from .models import AREA_CHOICES, Claim, FoundReport, LostReport
-from .utils import LAST5_RE, NAME_RE, clean_display_name, name_tokens, normalize_name, normalize_phone
+from .countries import COUNTRY_CHOICES, DEFAULT_COUNTRY, get_country, grouped_area_choices
+from .models import Claim, FoundReport, LostReport
+from .utils import NAME_RE, clean_display_name, name_tokens, normalize_name, normalize_phone
 
 
 class HoneypotMixin(forms.Form):
@@ -35,18 +36,57 @@ def _clean_full_name(value: str) -> str:
     return value
 
 
-def _clean_last5(value: str) -> str:
-    value = (value or "").strip().upper().replace(" ", "")
-    if not LAST5_RE.match(value):
-        raise ValidationError("Enter exactly 5 letters or numbers, for example 50E63.")
+def _clean_last5(value: str, country: str = DEFAULT_COUNTRY) -> str:
+    from .countries import last5_matches
+
+    value = (value or "").strip().upper().replace(" ", "").replace("-", "")
+    if not last5_matches(value, country):
+        raise ValidationError(get_country(country)["last5_error"])
     return value
+
+
+class CountryFieldsMixin(forms.Form):
+    """Country + place fields. The country is optional and defaults to Zimbabwe."""
+
+    country = forms.ChoiceField(choices=COUNTRY_CHOICES, required=False, initial=DEFAULT_COUNTRY, label="Country")
+    area = forms.ChoiceField(choices=grouped_area_choices(), label="Town, city or state")
+
+    def _selected_country(self) -> str:
+        code = (self.data.get("country") if self.is_bound else None) or DEFAULT_COUNTRY
+        return code if code in dict(COUNTRY_CHOICES) else DEFAULT_COUNTRY
+
+    def _apply_country_text(self, code: str):
+        c = get_country(code)
+        examples = {"full_name": c["name_example"], "last5": c["last5_example"],
+                    "location_detail": c["place_example"], "holder_phone": c["phone_example"],
+                    "phone": c["phone_example"], "claimant_phone": c["phone_example"]}
+        for name, text in examples.items():
+            if name in self.fields:
+                self.fields[name].widget.attrs["placeholder"] = text
+        if "last5" in self.fields:
+            self.fields["last5"].help_text = c["last5_help"]
+        self.fields["area"].label = c["area_label"].capitalize()
+
+    def _country_code(self) -> str:
+        return self.cleaned_data.get("country") or DEFAULT_COUNTRY
+
+    def clean_country(self):
+        return self.cleaned_data.get("country") or DEFAULT_COUNTRY
+
+    def clean_area(self):
+        area = self.cleaned_data["area"]
+        c = get_country(self._country_code())
+        if area not in c["areas"]:
+            raise ValidationError(f"Choose a {c['area_label']} in {c['name']}, or change the country.")
+        return area
 
 
 class SearchForm(forms.Form):
     q = forms.CharField(max_length=80, required=False)
+    country = forms.ChoiceField(choices=[("", "All countries")] + COUNTRY_CHOICES, required=False)
 
 
-class FoundForm(HoneypotMixin, forms.ModelForm):
+class FoundForm(CountryFieldsMixin, HoneypotMixin, forms.ModelForm):
     PLACEHOLDERS = {"full_name": "Tinashe Moyo", "last5": "50E63", "location_detail": "CBZ Kuwadzana branch",
                     "holder_name": "Your name", "holder_phone": "077..."}
     seen_confirmed = forms.BooleanField(
@@ -56,24 +96,29 @@ class FoundForm(HoneypotMixin, forms.ModelForm):
 
     class Meta:
         model = FoundReport
-        fields = ["full_name", "last5", "area", "location_detail", "holder_name", "holder_phone", "seen_confirmed"]
+        fields = ["country", "full_name", "last5", "area", "location_detail", "holder_name", "holder_phone", "seen_confirmed"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._apply_country_text(self._selected_country())
 
     def clean_full_name(self):
         return _clean_full_name(self.cleaned_data["full_name"])
 
     def clean_last5(self):
-        return _clean_last5(self.cleaned_data["last5"])
+        return _clean_last5(self.cleaned_data["last5"], self._country_code())
 
     def clean_holder_name(self):
         return clean_display_name(self.cleaned_data["holder_name"])
 
     def clean_holder_phone(self):
-        return normalize_phone(self.cleaned_data["holder_phone"])
+        return normalize_phone(self.cleaned_data["holder_phone"], self._country_code())
 
     def clean(self):
         data = super().clean()
         if data.get("full_name") and data.get("last5"):
             exists = FoundReport.objects.filter(
+                country=data.get("country") or DEFAULT_COUNTRY,
                 last5=data["last5"],
                 name_key=normalize_name(data["full_name"]),
                 status__in=[FoundReport.Status.PENDING, FoundReport.Status.APPROVED],
@@ -85,7 +130,7 @@ class FoundForm(HoneypotMixin, forms.ModelForm):
         return data
 
 
-class LostForm(HoneypotMixin, forms.ModelForm):
+class LostForm(CountryFieldsMixin, HoneypotMixin, forms.ModelForm):
     PLACEHOLDERS = {"full_name": "Tinashe Moyo", "last5": "50E63", "phone": "077...",
                     "location_detail": "Harare, CBZ (optional)"}
     consent = forms.BooleanField(
@@ -95,37 +140,43 @@ class LostForm(HoneypotMixin, forms.ModelForm):
 
     class Meta:
         model = LostReport
-        fields = ["full_name", "last5", "phone", "area", "location_detail", "consent"]
+        fields = ["country", "full_name", "last5", "phone", "area", "location_detail", "consent"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._apply_country_text(self._selected_country())
 
     def clean_full_name(self):
         return _clean_full_name(self.cleaned_data["full_name"])
 
     def clean_last5(self):
-        return _clean_last5(self.cleaned_data["last5"])
+        return _clean_last5(self.cleaned_data["last5"], self._country_code())
 
     def clean_phone(self):
-        return normalize_phone(self.cleaned_data["phone"])
+        return normalize_phone(self.cleaned_data["phone"], self._country_code())
 
 
 class ClaimForm(HoneypotMixin, forms.ModelForm):
-    PLACEHOLDERS = {"claimant_name": "Name exactly as on your ID", "claimant_phone": "077..."}
+    PLACEHOLDERS = {"claimant_name": "Name exactly as on your ID"}
     UPPER = ()
-    understood = forms.BooleanField(
-        required=True,
-        label="I understand I must bring a Passport, Driver's Licence or Birth Certificate to collect this ID.",
-    )
+    understood = forms.BooleanField(required=True)
 
     class Meta:
         model = Claim
         fields = ["claimant_name", "claimant_phone", "understood"]
         labels = {"claimant_name": "Your full name", "claimant_phone": "Your WhatsApp number"}
 
+    def __init__(self, *args, country: str = DEFAULT_COUNTRY, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.country = country
+        c = get_country(country)
+        self.fields["claimant_phone"].widget.attrs["placeholder"] = c["phone_example"]
+        self.fields["understood"].label = (
+            f"I understand I must bring {c['alt_ids']} to collect this ID."
+        )
+
     def clean_claimant_name(self):
         return _clean_full_name(self.cleaned_data["claimant_name"])
 
     def clean_claimant_phone(self):
-        return normalize_phone(self.cleaned_data["claimant_phone"])
-
-
-for _f in (FoundForm, LostForm):
-    _f.base_fields["area"].choices = [("", "Choose a town or city")] + list(AREA_CHOICES)
+        return normalize_phone(self.cleaned_data["claimant_phone"], self.country)

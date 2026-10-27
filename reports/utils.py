@@ -45,17 +45,27 @@ def mask_name(full_name: str) -> str:
     return f"{masked_first} {initials}".strip()
 
 
-def normalize_phone(raw: str) -> str:
-    """Return an E.164 number. Zimbabwean local numbers (07x...) become +263..."""
+def normalize_phone(raw: str, country: str = "ZW") -> str:
+    """Return an E.164 number. Local numbers become international using the report's country.
+
+    Numbers already written with + (or 00) are accepted for any country.
+    """
+    from .countries import get_country
+
+    c = get_country(country)
     s = re.sub(r"[\s\-().]", "", raw or "")
     if s.startswith("00"):
         s = "+" + s[2:]
-    if re.fullmatch(r"0\d{9}", s):
-        s = "+263" + s[1:]
-    elif re.fullmatch(r"263\d{9}", s):
-        s = "+" + s
+    if not s.startswith("+"):
+        dial = c["dial"]
+        if re.fullmatch(c["local_phone_re"], s):
+            s = "+" + dial + (s[1:] if s.startswith("0") else s)
+        elif s.startswith(dial) and re.fullmatch(r"\d{8,15}", s):
+            s = "+" + s
     if not re.fullmatch(r"\+\d{8,15}", s):
-        raise ValidationError("Enter a valid phone number, for example 0771234567 or +263771234567.")
+        raise ValidationError(
+            f"Enter a valid phone number, for example {c['phone_example']} or +{c['dial']}..."
+        )
     return s
 
 

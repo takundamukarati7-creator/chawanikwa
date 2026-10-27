@@ -4,6 +4,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
+from .countries import COUNTRY_CHOICES, DEFAULT_COUNTRY
 from .utils import mask_name, normalize_name
 
 _ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"  # no 0/O/1/I/L
@@ -13,11 +14,6 @@ def make_reference(prefix: str) -> str:
     return f"{prefix}-" + "".join(secrets.choice(_ALPHABET) for _ in range(6))
 
 
-AREA_CHOICES = [(a, a) for a in [
-    "Harare", "Bulawayo", "Chitungwiza", "Mutare", "Gweru", "Kwekwe", "Kadoma", "Masvingo",
-    "Chinhoyi", "Bindura", "Marondera", "Victoria Falls", "Hwange", "Beitbridge", "Gwanda",
-    "Chegutu", "Norton", "Ruwa", "Epworth", "Karoi", "Rusape", "Zvishavane", "Kariba", "Other",
-]]
 
 
 class ReferenceMixin(models.Model):
@@ -50,10 +46,11 @@ class FoundReport(ReferenceMixin):
         REJECTED = "rejected", "Rejected"
         COLLECTED = "collected", "Collected by owner"
 
+    country = models.CharField(max_length=2, choices=COUNTRY_CHOICES, default=DEFAULT_COUNTRY, db_index=True)
     full_name = models.CharField(max_length=120)
     name_key = models.CharField(max_length=120, db_index=True, editable=False)
     last5 = models.CharField("last 5 characters of ID", max_length=5, db_index=True)
-    area = models.CharField(max_length=40, choices=AREA_CHOICES)
+    area = models.CharField(max_length=40)
     location_detail = models.CharField("exact place found", max_length=160)
     holder_name = models.CharField("name of finder or agent", max_length=120)
     holder_phone = models.CharField("finder's phone", max_length=20)
@@ -93,11 +90,12 @@ class LostReport(ReferenceMixin):
         MATCHED = "matched", "Possible match"
         CLOSED = "closed", "Closed"
 
+    country = models.CharField(max_length=2, choices=COUNTRY_CHOICES, default=DEFAULT_COUNTRY, db_index=True)
     full_name = models.CharField(max_length=120)
     name_key = models.CharField(max_length=120, db_index=True, editable=False)
     last5 = models.CharField("last 5 characters of ID", max_length=5, db_index=True)
     phone = models.CharField("WhatsApp number", max_length=20)
-    area = models.CharField(max_length=40, choices=AREA_CHOICES)
+    area = models.CharField(max_length=40)
     location_detail = models.CharField("where it was lost", max_length=160, blank=True)
     consent = models.BooleanField(default=False)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE, db_index=True)
@@ -159,6 +157,7 @@ class Claim(ReferenceMixin):
         PASSPORT = "passport", "Passport"
         DRIVERS_LICENCE = "drivers_licence", "Driver's licence"
         BIRTH_CERTIFICATE = "birth_certificate", "Birth certificate"
+        OTHER_PHOTO_ID = "other_photo_id", "Other government photo ID"
 
     found = models.ForeignKey(FoundReport, on_delete=models.CASCADE, related_name="claims")
     claimant_name = models.CharField(max_length=120)

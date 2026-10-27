@@ -5,16 +5,16 @@ from .models import AuditLog, Claim, FoundReport, LostReport, Match
 
 @admin.register(FoundReport)
 class FoundAdmin(admin.ModelAdmin):
-    list_display = ("reference", "full_name", "last5", "area", "status", "created_at")
-    list_filter = ("status", "area")
+    list_display = ("reference", "full_name", "last5", "country", "area", "status", "created_at")
+    list_filter = ("status", "country", "area")
     search_fields = ("reference", "full_name", "last5")
     readonly_fields = ("reference", "name_key", "created_at")
 
 
 @admin.register(LostReport)
 class LostAdmin(admin.ModelAdmin):
-    list_display = ("reference", "full_name", "last5", "area", "status", "created_at")
-    list_filter = ("status", "area")
+    list_display = ("reference", "full_name", "last5", "country", "area", "status", "created_at")
+    list_filter = ("status", "country", "area")
     search_fields = ("reference", "full_name", "last5")
     readonly_fields = ("reference", "name_key", "created_at")
 

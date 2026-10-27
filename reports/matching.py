@@ -6,7 +6,7 @@ from .utils import names_compatible
 
 
 def _link(lost: LostReport, found: FoundReport) -> bool:
-    if lost.last5 != found.last5 or not names_compatible(lost.name_key, found.name_key):
+    if lost.country != found.country or lost.last5 != found.last5 or not names_compatible(lost.name_key, found.name_key):
         return False
     _, created = Match.objects.get_or_create(lost=lost, found=found)
     if lost.status == LostReport.Status.ACTIVE:
@@ -21,7 +21,7 @@ def match_for_found(found: FoundReport) -> int:
     if found.status != FoundReport.Status.APPROVED:
         return 0
     candidates = LostReport.objects.filter(
-        last5=found.last5, status__in=[LostReport.Status.ACTIVE, LostReport.Status.MATCHED]
+        country=found.country, last5=found.last5, status__in=[LostReport.Status.ACTIVE, LostReport.Status.MATCHED]
     )
     return sum(_link(lost, found) for lost in candidates)
 
@@ -29,5 +29,5 @@ def match_for_found(found: FoundReport) -> int:
 @transaction.atomic
 def match_for_lost(lost: LostReport) -> int:
     """Called when a new lost registration arrives."""
-    candidates = FoundReport.objects.filter(last5=lost.last5, status=FoundReport.Status.APPROVED)
+    candidates = FoundReport.objects.filter(country=lost.country, last5=lost.last5, status=FoundReport.Status.APPROVED)
     return sum(_link(lost, found) for found in candidates)
