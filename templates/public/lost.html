@@ -5,9 +5,10 @@
   {% include "partials/_tabs.html" with active="lost" %}
   <h2>Register a lost ID</h2>
   <p>If a matching ID is reported, our team contacts you on WhatsApp. We never publish your number.</p>
-  <form method="post" novalidate>{% csrf_token %}
+  <form method="post" novalidate data-countries="{{ COUNTRIES_JSON }}">{% csrf_token %}
     {% if form.non_field_errors %}<div class="form-errors" role="alert">{{ form.non_field_errors|join:" " }}</div>{% endif %}
     <div class="hp" aria-hidden="true">{{ form.website }}</div>
+    {% include "partials/_field.html" with field=form.country %}
     {% include "partials/_field.html" with field=form.full_name %}
     {% include "partials/_field.html" with field=form.last5 %}
     {% include "partials/_field.html" with field=form.phone %}

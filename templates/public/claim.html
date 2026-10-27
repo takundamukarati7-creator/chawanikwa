@@ -3,7 +3,7 @@
 {% block content %}
 <div class="narrow section"><div class="card">
   <h2>Start a claim</h2>
-  <div class="result"><div><b class="name">{{ found.masked_name }}</b> <span class="code">…{{ found.last5 }}</span><div class="meta"><span>{% include "partials/_icon.html" with name="pin" %} {{ found.area }}</span></div></div></div>
+  <div class="result"><div><b class="name">{{ found.masked_name }}</b> <span class="code">…{{ found.last5 }}</span><div class="meta"><span>{% include "partials/_icon.html" with name="pin" %} {{ found.area }}, {{ found.get_country_display }}</span></div></div></div>
   <p>This starts a request only. Nothing is handed over until an agent checks your identity in person.</p>
   <form method="post" novalidate>{% csrf_token %}
     {% if form.non_field_errors %}<div class="form-errors" role="alert">{{ form.non_field_errors|join:" " }}</div>{% endif %}

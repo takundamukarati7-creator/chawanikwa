@@ -6,8 +6,10 @@
     {% include "partials/_tabs.html" with active="search" %}
     <form method="get" action="{% url 'public:search' %}" role="search">
       <div class="searchbar">
+        <label for="country" class="skip">Country</label>
+        <select id="country" name="country" class="country-select"><option value="">All countries</option>{% for code, name in COUNTRY_CHOICES %}<option value="{{ code }}"{% if country == code %} selected{% endif %}>{{ name }}</option>{% endfor %}</select>
         <label for="q" class="skip">Name or last 5 characters</label>
-        <input id="q" name="q" value="{{ q }}" placeholder="Name or last 5 e.g. 50E63" autocomplete="off" required>
+        <input id="q" name="q" value="{{ q }}" placeholder="Name or last 5 characters" autocomplete="off" required>
         <button class="btn btn-dark" type="submit">{% include "partials/_icon.html" with name="search" %} Search now</button>
       </div>
     </form>
@@ -19,7 +21,7 @@
         <div class="result">
           <div>
             <b class="name">{{ r.masked_name }}</b> <span class="code">…{{ r.last5 }}</span>
-            <div class="meta"><span>{% include "partials/_icon.html" with name="pin" %} {{ r.area }}</span><span>{% include "partials/_icon.html" with name="clock" %} Reported {{ r.created_at|timesince }} ago</span></div>
+            <div class="meta"><span>{% include "partials/_icon.html" with name="pin" %} {{ r.area }}, {{ r.get_country_display }}</span><span>{% include "partials/_icon.html" with name="clock" %} Reported {{ r.created_at|timesince }} ago</span></div>
           </div>
           <a class="btn btn-sm" href="{% url 'public:claim' r.reference %}">{% include "partials/_icon.html" with name="user-check" %} This could be mine</a>
         </div>
