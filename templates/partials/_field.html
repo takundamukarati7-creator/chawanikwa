@@ -2,5 +2,5 @@
 <div><label class="check" for="{{ field.id_for_label }}">{{ field }}<span>{{ field.label }}</span></label>{{ field.errors }}</div>
 {% else %}
 <label for="{{ field.id_for_label }}">{{ field.label|capfirst }}{% if field.field.required %} *{% endif %}</label>
-{{ field }}{% if field.help_text %}<div class="help">{{ field.help_text }}</div>{% endif %}{{ field.errors }}
+{{ field }}{% if field.help_text %}<div class="help" id="{{ field.id_for_label }}_help">{{ field.help_text }}</div>{% endif %}{{ field.errors }}
 {% endif %}
