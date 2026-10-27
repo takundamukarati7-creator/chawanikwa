@@ -13,6 +13,7 @@ from django.views.decorators.http import require_GET, require_http_methods, requ
 
 from reports import matching
 from reports.audit import log_action
+from reports.countries import get_country
 from reports.models import AuditLog, Claim, FoundReport, LostReport, Match
 from reports.throttle import is_limited
 from reports.utils import normalize_name, whatsapp_link, whatsapp_web_link
@@ -61,8 +62,8 @@ def _first_name(full_name):
 def _owner_message(lost, found):
     return (
         f"Hello {_first_name(lost.full_name)}, this is Chawanikwa Found It. An ID that may be yours "
-        f"(ref {found.reference}) has been reported found in {found.area}. Please reply here and we will "
-        "arrange a safe handover. You must bring a Passport, Driver's Licence or Birth Certificate to "
+        f"(ref {found.reference}) has been reported found in {found.area}, {found.get_country_display()}. Please reply here and we will "
+        f"arrange a safe handover. You must bring {get_country(found.country)['alt_ids']} to "
         "prove it is yours."
     )
 
@@ -70,7 +71,7 @@ def _owner_message(lost, found):
 def _claimant_message(claim):
     return (
         f"Hello {_first_name(claim.claimant_name)}, this is Chawanikwa Found It about your claim "
-        f"{claim.reference}. Please bring a Passport, Driver's Licence or Birth Certificate so we can "
+        f"{claim.reference}. Please bring {get_country(claim.found.country)['alt_ids']} so we can "
         "confirm the ID is yours before handing it over."
     )
 
