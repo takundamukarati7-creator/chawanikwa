@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}{{ SITE_NAME }}{% endblock %}</title>
-<meta name="description" content="Search free for a lost ID found in Zimbabwe, or report one you have found. Safe verification and handover.">
+<meta name="description" content="Search free for a lost ID found in Zimbabwe, South Africa or the USA, or report one you have found. Safe verification and handover.">
 <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
 <link rel="stylesheet" href="{% static 'css/app.css' %}">
 </head>
@@ -16,7 +16,7 @@
   <div class="container nav-row">
     <a class="brand" href="{% url 'public:home' %}">
       <img src="{% static 'img/logo.svg' %}" alt="" width="40" height="40">
-      <span><b>Chawanikwa</b><small><img src="{% static 'img/flag-zw.svg' %}" alt="" width="18" height="10">Zimbabwe · Found IDs</small></span>
+      <span><b>Chawanikwa</b><small>Found IDs · Zimbabwe · South Africa · USA</small></span>
     </a>
     <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-label="Menu">{% include "partials/_icon.html" with name="menu" %}</button>
     <nav class="nav" data-nav aria-label="Main">
