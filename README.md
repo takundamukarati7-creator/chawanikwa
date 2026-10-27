@@ -1,6 +1,6 @@
 # Chawanikwa Found It
 
-A Django web app for reuniting people with lost national IDs in Zimbabwe.
+A Django web app for reuniting people with lost IDs in Zimbabwe, South Africa and the USA.
 
 - **Public search** with no account. Results show a partly hidden name (`Tin***e M.`), the last 5 characters and the town. Never a photo, a full ID number, a phone number or the exact place.
 - **Report a found ID** and **register a lost ID**. Found reports wait in a moderation queue and are not searchable until a staff member approves them.
@@ -8,6 +8,16 @@ A Django web app for reuniting people with lost national IDs in Zimbabwe.
 - **Staff dashboard** (`/staff/`) with live counts, moderation queue, owner matches (WhatsApp links that staff send themselves), claims and an audit log.
 
 The app never claims a report is genuine. "Listed" means a team member reviewed a finder's report, nothing more.
+
+## Countries
+
+People choose a country on the report forms and can filter searches by country. The country decides:
+phone number rules (a local `082...` number becomes `+27...`), the towns/states offered, what the
+"last 5 characters" of the ID look like (Zimbabwe: letters or numbers, South Africa: 5 digits,
+USA: licence or state ID, never a Social Security number), and which documents are checked at handover.
+Reports only match inside the same country.
+
+**Add another country:** add one entry to `COUNTRIES` in `reports/countries.py`. Nothing else is needed.
 
 ---
 
