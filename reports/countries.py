@@ -71,6 +71,28 @@ COUNTRIES = {
             "West Virginia", "Wisconsin", "Wyoming", "Other",
         ],
     },
+    "GB": {
+        "name": "United Kingdom",
+        "dial": "44",
+        "local_phone_re": r"0\d{9,10}",   # 07123456789 -> +447123456789
+        "phone_example": "07123456789",
+        "last5_re": r"^[A-Z0-9]{5}$",
+        "last5_example": "SM9IJ",
+        "last5_help": (
+            "The last 5 letters or numbers of the driving licence number or other photo ID number. "
+            "Never enter a National Insurance number."
+        ),
+        "last5_error": "Enter exactly 5 letters or numbers from the end of the photo ID number.",
+        "name_example": "Amelia Clarke",
+        "place_example": "Tesco, High Street",
+        "area_label": "town or city",
+        "alt_ids": "a Passport, Birth Certificate or another government-issued photo ID",
+        "areas": [
+            "London", "Birmingham", "Manchester", "Leeds", "Liverpool", "Sheffield", "Bristol",
+            "Newcastle", "Nottingham", "Leicester", "Coventry", "Bradford", "Southampton", "Brighton",
+            "Cardiff", "Swansea", "Edinburgh", "Glasgow", "Aberdeen", "Belfast", "Other",
+        ],
+    },
 }
 
 DEFAULT_COUNTRY = "ZW"
