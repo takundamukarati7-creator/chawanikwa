@@ -565,3 +565,18 @@ class MultiCountryTests(Base):
             for country in ("Zimbabwe", "South Africa", "United States"):
                 self.assertIn(country, html)
             self.assertNotIn("<script>", html)
+
+
+class UnitedKingdomTests(Base):
+    def test_uk_phone_and_registration(self):
+        self.assertEqual(normalize_phone("07123 456789", "GB"), "+447123456789")
+        data = dict(LOST_DATA, country="GB", last5="sm9ij", area="London", phone="07123 456789",
+                    full_name="Amelia Clarke")
+        r = self.client.post(reverse("public:lost"), data)
+        self.assertEqual(r.status_code, 302, getattr(r, "context", None) and r.context["form"].errors)
+        lost = LostReport.objects.get()
+        self.assertEqual((lost.country, lost.area, lost.last5, lost.phone), ("GB", "London", "SM9IJ", "+447123456789"))
+
+    def test_uk_is_offered_on_forms_and_search(self):
+        for name in ["lost", "found", "search"]:
+            self.assertContains(self.client.get(reverse(f"public:{name}")), "United Kingdom")
